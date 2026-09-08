@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘의 습관</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF2F0;
+    --surface:#FFFFFF;
+    --ink:#1E2B27;
+    --ink-soft:#5B6B65;
+    --ink-faint:#9AA8A3;
+    --line:#DCE3DF;
+    --line-soft:#E8ECE9;
+    --accent:#2F6F5E;
+    --accent-soft:#DCEBE6;
+    --warm:#E8873A;
+    --danger:#B15046;
+    --radius-l:14px;
+    --radius-m:10px;
+    --radius-s:7px;
+    --shadow: 0 1px 2px rgba(30,43,39,0.04), 0 6px 20px rgba(30,43,39,0.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Manrope',sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 64px;
+  }
+  .app{
+    width:100%;
+    max-width:460px;
+  }
+  header{
+    padding:4px 4px 22px;
+  }
+  .eyebrow{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 2px;
+    letter-spacing:0.01em;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:30px;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius-l);
+    box-shadow:var(--shadow);
+    padding:6px;
+    margin-bottom:16px;
+  }
+
+  .habit-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 12px;
+    border-radius:var(--radius-m);
+    transition:background .15s ease;
+  }
+  .habit-row:not(:last-child){
+    border-bottom:1px solid var(--line-soft);
+  }
+  .habit-row:hover{ background:#FAFBFA; }
+
+  .check{
+    flex:0 0 auto;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    border:2px solid var(--dot,var(--accent));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    background:var(--surface);
+    transition:transform .12s ease, background .15s ease;
+  }
+  .check svg{
+    width:15px;
+    height:15px;
+    opacity:0;
+    transform:scale(.6);
+    transition:opacity .12s ease, transform .12s ease;
+  }
+  .check.done{
+    background:var(--dot,var(--accent));
+  }
+  .check.done svg{ opacity:1; transform:scale(1); }
+  .check.done svg path{ stroke:#fff; }
+  .check:active{ transform:scale(.92); }
+
+  .habit-info{ flex:1; min-width:0; }
+  .habit-name{
+    font-size:16px;
+    font-weight:600;
+    margin:0 0 2px;
+    color:var(--ink);
+  }
+  .habit-streak{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .habit-streak b{
+    color:var(--dot,var(--accent));
+    font-weight:800;
+  }
+
+  .remove-btn{
+    flex:0 0 auto;
+    width:26px;
+    height:26px;
+    border:none;
+    background:transparent;
+    color:var(--ink-faint);
+    cursor:pointer;
+    font-size:18px;
+    line-height:1;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .remove-btn:hover{ background:var(--line-soft); color:var(--danger); }
+
+  .empty-state{
+    padding:28px 20px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:14px;
+    line-height:1.6;
+  }
+
+  form.add-form{
+    display:flex;
+    gap:8px;
+    padding:14px;
+  }
+  .add-form input[type="text"]{
+    flex:1;
+    min-width:0;
+    border:1px solid var(--line);
+    border-radius:var(--radius-s);
+    padding:10px 12px;
+    font-size:15px;
+    font-family:inherit;
+    background:#FCFDFC;
+    color:var(--ink);
+  }
+  .add-form input[type="text"]:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  .add-form button{
+    border:none;
+    background:var(--accent);
+    color:#fff;
+    font-family:inherit;
+    font-weight:700;
+    font-size:14px;
+    padding:0 18px;
+    border-radius:var(--radius-s);
+    cursor:pointer;
+  }
+  .add-form button:hover{ background:#275c4d; }
+
+  .section-title{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:26px 4px 10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+
+  .habit-tabs{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding:12px 12px 4px;
+  }
+  .tab{
+    flex:0 0 auto;
+    padding:6px 13px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:600;
+    background:var(--line-soft);
+    color:var(--ink-soft);
+    cursor:pointer;
+    border:1px solid transparent;
+    white-space:nowrap;
+  }
+  .tab.active{
+    background:var(--tab-bg,var(--accent-soft));
+    color:var(--tab-fg,var(--accent));
+    border-color:var(--tab-fg,var(--accent));
+  }
+
+  .cal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 14px 4px;
+  }
+  .cal-header button{
+    border:none;
+    background:transparent;
+    font-size:17px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+  }
+  .cal-header button:hover{ background:var(--line-soft); color:var(--ink); }
+  .cal-header .month-label{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    font-weight:600;
+  }
+
+  .weekdays, .days{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+  }
+  .weekdays{
+    padding:2px 10px 0;
+  }
+  .weekdays span{
+    text-align:center;
+    font-size:11px;
+    color:var(--ink-faint);
+    padding-bottom:4px;
+  }
+  .days{ padding:0 10px 14px; }
+  .day{
+    aspect-ratio:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    border-radius:var(--radius-s);
+    cursor:pointer;
+    position:relative;
+  }
+  .day.blank{ cursor:default; }
+  .day .num{
+    font-size:12.5px;
+    color:var(--ink);
+  }
+  .day.future .num{ color:var(--ink-faint); }
+  .day.future{ cursor:default; }
+  .day .mark{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:transparent;
+  }
+  .day.done .mark{ background:var(--dot,var(--accent)); }
+  .day.done{ background:var(--dot-soft,var(--accent-soft)); }
+  .day.today{ box-shadow:inset 0 0 0 1.5px var(--ink-soft); }
+  .day:not(.blank):not(.future):hover{ background:var(--line-soft); }
+  .day.done:not(.future):hover{ background:var(--dot-soft,var(--accent-soft)); }
+
+  .stats{
+    display:flex;
+    padding:6px 14px 16px;
+    gap:8px;
+  }
+  .stat{
+    flex:1;
+    background:#FAFBFA;
+    border-radius:var(--radius-m);
+    padding:12px 10px;
+    text-align:center;
+  }
+  .stat .num{
+    font-family:'Fraunces',serif;
+    font-size:22px;
+    font-weight:700;
+    color:var(--dot,var(--accent));
+  }
+  .stat .label{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+
+  footer.hint{
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-faint);
+    padding:10px 20px 0;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <p class="eyebrow" id="todayLabel"></p>
+    <h1>오늘의 습관</h1>
+  </header>
+
+  <div class="card">
+    <div id="habitList"></div>
+    <form class="add-form" id="addForm">
+      <input type="text" id="habitInput" placeholder="새 습관 (예: 물 마시기)" maxlength="20" autocomplete="off">
+      <button type="submit">추가</button>
+    </form>
+  </div>
+
+  <div class="section-title"><span>달력으로 보기</span></div>
+  <div class="card" id="calendarCard">
+    <div class="habit-tabs" id="habitTabs"></div>
+    <div class="cal-header">
+      <button id="prevMonth" aria-label="이전 달">‹</button>
+      <span class="month-label" id="monthLabel"></span>
+      <button id="nextMonth" aria-label="다음 달">›</button>
+    </div>
+    <div class="weekdays">
+      <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+    </div>
+    <div class="days" id="calendarGrid"></div>
+    <div class="stats" id="statsRow"></div>
+  </div>
+
+  <footer class="hint">달력의 지난 날짜를 눌러 기록을 수정할 수 있어요. 기록은 이 브라우저에 자동 저장돼요.</footer>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'habitTrackerData_v1';
+  const PALETTE = [
+    {dot:'#2F6F5E', soft:'#DCEBE6'},
+    {dot:'#E8873A', soft:'#FBE7D3'},
+    {dot:'#4C6FB1', soft:'#DEE6F5'},
+    {dot:'#B15046', soft:'#F5DEDC'},
+    {dot:'#8B6F3F', soft:'#EEE4D2'},
+    {dot:'#5B7C99', soft:'#DEE9EF'},
+  ];
+
+  function todayStr(){ return fmtDate(new Date()); }
+  function fmtDate(d){
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function parseDate(s){
+    const [y,m,d]=s.split('-').map(Number);
+    return new Date(y, m-1, d);
+  }
+
+  function loadData(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return {
+      habits:[
+        {id:'h1', name:'물 마시기', colorIdx:0},
+        {id:'h2', name:'스트레칭', colorIdx:1},
+      ],
+      logs:{ h1:{}, h2:{} },
+      nextColor:2
+    };
+  }
+  function saveData(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  let state = loadData();
+  let selectedHabitId = state.habits[0] ? state.habits[0].id : null;
+  let viewDate = new Date();
+  viewDate.setDate(1);
+
+  function colorOf(habit){
+    return PALETTE[habit.colorIdx % PALETTE.length];
+  }
+
+  function currentStreak(habitId){
+    const log = state.logs[habitId] || {};
+    let streak = 0;
+    let cursor = new Date();
+    if(!log[fmtDate(cursor)]){
+      cursor.setDate(cursor.getDate()-1);
+    }
+    while(log[fmtDate(cursor)]){
+      streak++;
+      cursor.setDate(cursor.getDate()-1);
+    }
+    return streak;
+  }
+
+  function bestStreak(habitId){
+    const log = state.logs[habitId] || {};
+    const dates = Object.keys(log).filter(k=>log[k]).sort();
+    if(dates.length===0) return 0;
+    let best=1, run=1;
+    for(let i=1;i<dates.length;i++){
+      const prev = parseDate(dates[i-1]);
+      const cur = parseDate(dates[i]);
+      const diff = Math.round((cur-prev)/86400000);
+      if(diff===1){ run++; } else { run=1; }
+      if(run>best) best=run;
+    }
+    return best;
+  }
+
+  function monthCompletion(habitId, year, month){
+    const log = state.logs[habitId] || {};
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    const now = new Date();
+    const isCurrentMonth = (now.getFullYear()===year && now.getMonth()===month);
+    const totalDays = isCurrentMonth ? now.getDate() : daysInMonth;
+    let done=0;
+    for(let d=1; d<=totalDays; d++){
+      const s = fmtDate(new Date(year, month, d));
+      if(log[s]) done++;
+    }
+    if(totalDays===0) return 0;
+    return Math.round((done/totalDays)*100);
+  }
+
+  function toggleHabitDate(habitId, dateStr){
+    if(!state.logs[habitId]) state.logs[habitId]={};
+    if(state.logs[habitId][dateStr]) delete state.logs[habitId][dateStr];
+    else state.logs[habitId][dateStr]=true;
+    saveData();
+    renderAll();
+  }
+
+  function addHabit(name){
+    const id = 'h'+Date.now();
+    state.habits.push({id, name, colorIdx: state.nextColor||0});
+    state.nextColor = ((state.nextColor||0)+1) % PALETTE.length;
+    state.logs[id] = {};
+    selectedHabitId = id;
+    saveData();
+    renderAll();
+  }
+
+  function removeHabit(id){
+    state.habits = state.habits.filter(h=>h.id!==id);
+    delete state.logs[id];
+    if(selectedHabitId===id){
+      selectedHabitId = state.habits[0] ? state.habits[0].id : null;
+    }
+    saveData();
+    renderAll();
+  }
+
+  function renderHeader(){
+    const now = new Date();
+    const opts = {month:'long', day:'numeric', weekday:'long'};
+    document.getElementById('todayLabel').textContent = now.toLocaleDateString('ko-KR', opts);
+  }
+
+  function renderHabitList(){
+    const listEl = document.getElementById('habitList');
+    listEl.innerHTML='';
+    if(state.habits.length===0){
+      listEl.innerHTML = '<div class="empty-state">아직 등록한 습관이 없어요.<br>아래에서 첫 습관을 추가해보세요.</div>';
+      return;
+    }
+    const today = todayStr();
+    state.habits.forEach(habit=>{
+      const c = colorOf(habit);
+      const done = !!(state.logs[habit.id] && state.logs[habit.id][today]);
+      const streak = currentStreak(habit.id);
+      const row = document.createElement('div');
+      row.className='habit-row';
+      row.style.setProperty('--dot', c.dot);
+      row.style.setProperty('--dot-soft', c.soft);
+      row.innerHTML = `
+        <div class="check ${done?'done':''}" data-id="${habit.id}">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5L9.5 18L20 6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="habit-info">
+          <p class="habit-name">${escapeHtml(habit.name)}</p>
+          <p class="habit-streak">${streak>0 ? `<b>${streak}일</b> 연속 진행 중` : '오늘부터 시작해보세요'}</p>
+        </div>
+        <button class="remove-btn" data-remove="${habit.id}" aria-label="삭제">×</button>
+      `;
+      listEl.appendChild(row);
+    });
+  }
+
+  function renderTabs(){
+    const tabsEl = document.getElementById('habitTabs');
+    tabsEl.innerHTML='';
+    state.habits.forEach(habit=>{
+      const c = colorOf(habit);
+      const tab = document.createElement('div');
+      tab.className = 'tab' + (habit.id===selectedHabitId ? ' active' : '');
+      tab.textContent = habit.name;
+      tab.dataset.id = habit.id;
+      if(habit.id===selectedHabitId){
+        tab.style.setProperty('--tab-bg', c.soft);
+        tab.style.setProperty('--tab-fg', c.dot);
+      }
+      tabsEl.appendChild(tab);
+    });
+  }
+
+  function renderCalendar(){
+    const grid = document.getElementById('calendarGrid');
+    const monthLabel = document.getElementById('monthLabel');
+    const statsRow = document.getElementById('statsRow');
+    grid.innerHTML='';
+    statsRow.innerHTML='';
+
+    if(!selectedHabitId){
+      monthLabel.textContent='';
+      return;
+    }
+
+    const habit = state.habits.find(h=>h.id===selectedHabitId);
+    const c = colorOf(habit);
+    document.getElementById('calendarCard').style.setProperty('--dot', c.dot);
+    document.getElementById('calendarCard').style.setProperty('--dot-soft', c.soft);
+
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    monthLabel.textContent = viewDate.toLocaleDateString('ko-KR', {year:'numeric', month:'long'});
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    const today = todayStr();
+    const log = state.logs[selectedHabitId] || {};
+
+    for(let i=0;i<firstDay;i++){
+      const blank = document.createElement('div');
+      blank.className='day blank';
+      grid.appendChild(blank);
+    }
+    for(let d=1; d<=daysInMonth; d++){
+      const dateObj = new Date(year, month, d);
+      const dateStr = fmtDate(dateObj);
+      const isFuture = dateStr > today;
+      const cell = document.createElement('div');
+      cell.className = 'day' + (log[dateStr] ? ' done' : '') + (dateStr===today ? ' today' : '') + (isFuture ? ' future' : '');
+      cell.innerHTML = `<span class="num">${d}</span><span class="mark"></span>`;
+      if(!isFuture){
+        cell.dataset.date = dateStr;
+      }
+      grid.appendChild(cell);
+    }
+
+    const streak = currentStreak(selectedHabitId);
+    const best = bestStreak(selectedHabitId);
+    const pct = monthCompletion(selectedHabitId, year, month);
+    statsRow.style.setProperty('--dot', c.dot);
+    statsRow.innerHTML = `
+      <div class="stat"><div class="num">${streak}</div><div class="label">현재 연속일</div></div>
+      <div class="stat"><div class="num">${best}</div><div class="label">최장 기록</div></div>
+      <div class="stat"><div class="num">${pct}%</div><div class="label">이번 달 달성률</div></div>
+    `;
+  }
+
+  function renderAll(){
+    renderHeader();
+    renderHabitList();
+    renderTabs();
+    renderCalendar();
+  }
+
+  function escapeHtml(s){
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  document.getElementById('habitList').addEventListener('click', (e)=>{
+    const checkEl = e.target.closest('.check');
+    if(checkEl){
+      toggleHabitDate(checkEl.dataset.id, todayStr());
+      return;
+    }
+    const removeEl = e.target.closest('[data-remove]');
+    if(removeEl){
+      removeHabit(removeEl.dataset.remove);
+    }
+  });
+
+  document.getElementById('addForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const input = document.getElementById('habitInput');
+    const name = input.value.trim();
+    if(!name) return;
+    addHabit(name);
+    input.value='';
+  });
+
+  document.getElementById('habitTabs').addEventListener('click', (e)=>{
+    const tab = e.target.closest('.tab');
+    if(!tab) return;
+    selectedHabitId = tab.dataset.id;
+    renderTabs();
+    renderCalendar();
+  });
+
+  document.getElementById('calendarGrid').addEventListener('click', (e)=>{
+    const cell = e.target.closest('.day');
+    if(!cell || cell.classList.contains('blank') || cell.classList.contains('future')) return;
+    if(!cell.dataset.date) return;
+    toggleHabitDate(selectedHabitId, cell.dataset.date);
+  });
+
+  document.getElementById('prevMonth').addEventListener('click', ()=>{
+    viewDate.setMonth(viewDate.getMonth()-1);
+    renderCalendar();
+  });
+  document.getElementById('nextMonth').addEventListener('click', ()=>{
+    viewDate.setMonth(viewDate.getMonth()+1);
+    renderCalendar();
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
